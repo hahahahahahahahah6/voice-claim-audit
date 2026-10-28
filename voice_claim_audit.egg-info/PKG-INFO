@@ -1,0 +1,42 @@
+Metadata-Version: 2.4
+Name: voice-claim-audit
+Version: 0.1.0
+Summary: Static audit of documented spoken capabilities
+License-Expression: MIT
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
+# voice-claim-audit
+
+Version 0.1.0. Offline static audit of documented spoken-input / spoken-output delivery claims against Python source. Runtime dependencies: standard library only. Audited code is never executed.
+
+Install and run:
+
+```sh
+python3 -m pip install .
+voice-claim-audit /path/to/project
+python3 -m voice_claim_audit /path/to/project --json
+python3 -m voice_claim_audit --version
+python3 -m unittest discover
+python3 -m build
+```
+
+Options: `--json` emits structured results; `--verbose` lists production evidence, test evidence and parse diagnostics. Repeat `--ignore GLOB` to exclude root-relative paths. `--fail-on HIGH` is the default; `--fail-on MEDIUM` also fails on test-only evidence. Exits: 0 for PASS, 2 for findings meeting the threshold, 1 for usage or input errors. JSON contains verdict, findings (rule, severity, message), claims, evidence, test_evidence and parse_errors.
+
+## Limitations
+
+Only a fixed vocabulary of explicit spoken capability and absence statements counts. A bare channel noun, chapter title, dependency or tool name is insufficient. Matching ignores case, expands contracted negation, replaces hyphens and collapses whitespace within blank-line-separated paragraphs. Absence spans are removed first. Root README.md and Markdown beneath any docs path component are scanned; fenced blocks are excluded and inline code counts.
+
+SMS, email, push notifications, webhooks, websockets, server-sent events, GraphQL, gRPC, MQTT and plain audio playback are outside this audit's claim vocabulary.
+
+Evidence requires construction and a qualifying method call in one module: Recognizer and a recognize_* method from speech_recognition; load_model and transcribe from whisper; init and say from pyttsx3; or gTTS and save/write_to_fp from gtts. Import aliases, dotted assignment receivers and chained construction are recognized. Intermediate method aliases, cross-module pairs, microphone capture, playback, queue flushing alone, constants and imports alone are insufficient. Analysis is syntactic: it does not prove reachability, model availability, hardware operation or correct runtime behavior, and does not model reassignment or lexical scopes. Invalid syntax is reported in parse_errors and cannot supply evidence.
+
+Production evidence excludes tests, test-named files, fixtures, docs and examples. Symlinks are skipped. Test evidence can lower an unsupported positive finding to MEDIUM. An absence statement contradicted by production evidence remains HIGH regardless of its documentation location. At most one finding per family is emitted. Without a matching claim the result passes, regardless of source evidence. Without source, a positive claim fails HIGH and an absence statement passes. Environment files are never opened.
+
+Findings distinguish unsupported positive documentation from contradicted absence statements. The latter is always HIGH.
+
+## Development
+
+Python 3.9 or later is required. The sdist includes the unittest suite and its fixtures. MIT licensed.

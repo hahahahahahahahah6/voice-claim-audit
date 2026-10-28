@@ -1,0 +1,2 @@
+[console_scripts]
+voice-claim-audit = voice_claim_audit.audit:main
